@@ -1,0 +1,143 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+void deposit(vector<int>& depositList) {
+    int amount;
+    cout << "Type in how much you want to deposit: ";
+    cin >> amount;
+
+    cout << "Your desired deposit: " << amount << endl;
+
+    depositList.push_back(amount);
+
+    cout << "\n";
+
+    for (int i = 0; i < depositList.size(); i++) {
+        cout << "You deposited: " << depositList[i] << "\n";
+    }
+}
+
+void create_account(vector<string>& usernameL, vector<string>& passwordL) {
+    string username, password;
+    cout << "Enter username: ";
+    cin >> username;
+    cout << "Enter password: ";
+    cin >> password;
+
+    usernameL.push_back(username);
+    passwordL.push_back(password);
+
+    cout << "Account created successfully!\n";
+}
+
+void withdraw(vector<int>& depositList){
+    int withdraw;
+    cout << "Type how much you want to withdraw: ";
+    cin >> withdraw;
+    
+    // Find the first occurrence of the amount in the depositList
+    auto it = find(depositList.begin(), depositList.end(), withdraw);
+
+    // Check if the amount is found in the depositList
+    if (it != depositList.end()) {
+        // If found, erase it from the depositList
+        depositList.erase(it);
+        cout << "You withdrew: " << withdraw << endl;
+    } else {
+        // If not found, print a message
+        cout << "Amount not found in deposit list.\n";
+    }
+
+    cout << "\n";
+
+    // Print the remaining deposits
+    for (int i = 0; i < depositList.size(); i++) {
+        cout << "Remaining deposits: " << depositList[i] << "\n";
+    }
+
+    
+
+}
+
+void close_account(vector<string>& usernameL, vector<string>& passwordL) {
+    string closeUsername;
+    string closePassword;
+
+    cout << "Close Account\n";
+    cout << "Enter your username: ";
+    cin >> closeUsername;
+
+    // Find the first occurrence of the username in the username list
+    auto itUser = find(usernameL.begin(), usernameL.end(), closeUsername);
+
+    // Check if the username is found in the username list
+    if (itUser != usernameL.end()) {
+        // Get the index of the found username
+        int index = distance(usernameL.begin(), itUser);
+
+        cout << "Enter your password: ";
+        cin >> closePassword;
+
+        // Check if the password at the same index matches
+        if (passwordL[index] == closePassword) {
+            // If the username and password match, erase both from their respective lists
+            usernameL.erase(itUser);
+            passwordL.erase(passwordL.begin() + index);
+
+            cout << "Your account has been deleted successfully!\n";
+        } else {
+            cout << "Password does not match.\n";
+        }
+    } else {
+        // If the username is not found, print a message
+        cout << "Username not found.\n";
+    }
+}
+
+void current_balance(int balance) {
+    cout << "Your current balance is: " << balance << endl;
+}
+
+int main() {
+    
+    vector<int> depositList;
+    
+    vector<string> usernameL{"user1", "user2", "user3"};
+    vector<string> passwordL{"pass1", "pass2", "pass3"};
+    
+    int balance = 0;
+
+    int input;
+
+    cout << "Billing System\n";
+    cout << "(1) Create Account\n";
+    cout << "(2) Make a Deposit\n";
+    cout << "(3) Withdraw\n";
+    cout << "(4) Close the Account\n";
+    cout << "(5) Current Balance\n";
+    cout << "(6) Exit\n";
+
+    cin >> input;
+
+    if (input == 1) {
+        create_account(usernameL, passwordL);
+    } else if (input == 2) {
+        deposit(depositList);
+    } else if (input == 3) {
+        withdraw(depositList);
+    } else if (input == 4) {
+        close_account(usernameL, passwordL);
+    } else if (input == 5) {
+        current_balance(balance);
+    } else if (input == 6) {
+        cout << "Exiting...\n";
+    }
+    else {
+        cout << "Invalid option\n";
+    }
+
+    return 0;
+}
