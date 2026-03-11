@@ -1,0 +1,133 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+#define MAX_REQUESTS 50
+#define MAX_NAME_LENGTH 30
+
+struct request {
+    char name_request[MAX_NAME_LENGTH];
+    int num_request;
+};
+
+// Function prototypes
+void initialize_array(struct request requests[], int size);
+void read_file(FILE *fpreservation, struct request requests[], int *count);
+struct request extract(const char *s);
+int find(struct request requests[], int count, const char *name_request);
+void print_requests(struct request requests[], int count);
+void sort_requests(struct request requests[], int count);
+
+int main(int argc, char *argv[]) {
+    if (argc != 2) {
+        printf("Error: Missing file argument.\n");
+        return EXIT_FAILURE;
+    }
+
+    FILE *fpreservation = fopen(argv[1], "r");
+    if (fpreservation == NULL) {
+        printf("Error: Could not open file %s.\n", argv[1]);
+        return EXIT_FAILURE;
+    }
+
+    struct request requests[MAX_REQUESTS];
+    int count = 0;
+
+    initialize_array(requests, MAX_REQUESTS);
+    read_file(fpreservation, requests, &count);
+
+    // Sort the results before printing
+    sort_requests(requests, count);
+    
+    print_requests(requests, count);
+
+    fclose(fpreservation);
+    return 0;
+}
+
+void initialize_array(struct request requests[], int size) {
+    for (int i = 0; i < size; i++) {
+        requests[i].name_request[0] = '\0';  // Ensure empty string
+        requests[i].num_request = 0;
+    }
+}
+
+void read_file(FILE *fpreservation, struct request requests[], int *count) {
+    char buffer[100];
+
+    while (fgets(buffer, sizeof(buffer), fpreservation)) {
+        buffer[strcspn(buffer, "\n")] = '\0';  // Remove newline
+
+        struct request req = extract(buffer);
+
+        // Only process valid requests that start with "no"
+        if (req.name_request[0] == '\0' || req.num_request == 0) {
+            continue; // Skip invalid lines
+        }
+
+        int idx = find(requests, *count, req.name_request);
+        if (idx == -1) {
+            // Insert new request
+            if (*count < MAX_REQUESTS) {
+                strcpy(requests[*count].name_request, req.name_request);
+                requests[*count].num_request = req.num_request;
+                (*count)++;
+            }
+        } else {
+            // Update existing request count
+            requests[idx].num_request += req.num_request;
+        }
+    }
+}
+
+struct request extract(const char *s) {
+    struct request req;
+    req.name_request[0] = '\0'; 
+    req.num_request = 0;
+
+    char name[MAX_NAME_LENGTH];
+    int num;
+
+    if (sscanf(s, "%29s %d", name, &num) == 2) {
+        // Ensure it's a request (should start with "no")
+        if (strncmp(name, "no", 2) == 0) {
+            strcpy(req.name_request, name);
+            req.num_request = num;
+        }
+    }
+
+    return req;
+}
+
+int find(struct request requests[], int count, const char *name_request) {
+    for (int i = 0; i < count; i++) {
+        if (strcmp(requests[i].name_request, name_request) == 0) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+void print_requests(struct request requests[], int count) {
+    if (count == 0) {
+        printf("nessunarichiesta: 0\n");
+        return;
+    }
+
+    for (int i = 0; i < count; i++) {
+        printf("%s: %d\n", requests[i].name_request, requests[i].num_request);
+    }
+}
+
+// Sorting function to maintain expected order
+void sort_requests(struct request requests[], int count) {
+    for (int i = 0; i < count - 1; i++) {
+        for (int j = i + 1; j < count; j++) {
+            if (strcmp(requests[i].name_request, requests[j].name_request) > 0) {
+                struct request temp = requests[i];
+                requests[i] = requests[j];
+                requests[j] = temp;
+            }
+        }
+    }
+}
